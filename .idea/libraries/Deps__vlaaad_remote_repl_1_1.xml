@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Deps: vlaaad/remote-repl:1.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/vlaaad/remote-repl/1.1/remote-repl-1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,50 +1,70 @@
 # maze-solver
 
-FIXME: my new application.
+Solves shortest path from `:s` to `:g` in a maze.
 
-## Installation
+A maze is a vector of vectors. `:w` represents a wall, `:o` represents traversable cell.
 
-Download from https://github.com/exfn/maze-solver
+A maze:
 
-## Usage
+```clojure
+(def test-mapw
+  [[:w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :w :o :o :o :o :o :o :w :o :o :o :o :o :o :o :o :w :w :w :w :w :o :o :o :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :w :o :o :o :o :o :o :w :o :w :w :w :w :w :w :o :o :o :w :w :w :o :w :w :w :w :w :w :w :w :w :w :w :w :w :w :o :o :o :w]
+   [:w :w :w :w :w :w :w :w :w :w :o :o :o :o :o :o :w :o :w :w :w :w :w :w :w :w :o :w :o :o :o :w :w :w :w :w :w :w :w :w :o :o :o :o :w :o :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :w :o :o :o :o :o :o :w :o :w :w :w :w :w :w :w :w :o :o :o :w :w :w :o :w :w :w :w :w :w :w :o :w :w :o :w :o :w :w :w]
+   [:w :w :w :o :o :o :o :o :o :w :o :o :o :o :o :o :w :o :w :w :w :o :o :o :o :o :w :w :o :w :w :w :o :w :w :w :w :w :w :w :o :w :w :o :w :o :w :w :w]
+   [:w :w :o :o :s :o :w :o :o :o :o :o :o :o :o :o :w :o :w :w :w :o :w :w :w :o :w :w :o :w :w :o :o :o :o :w :w :o :o :o :o :o :w :o :o :o :o :w :w]
+   [:w :o :o :w :o :o :w :o :o :w :o :o :o :o :o :o :o :o :w :o :o :o :w :w :w :o :w :w :o :w :w :o :w :w :o :w :w :o :o :o :o :o :w :w :w :w :o :w :w]
+   [:w :o :w :w :o :w :w :w :o :w :o :o :o :o :o :o :w :o :w :o :w :w :w :w :w :o :o :w :o :w :w :o :w :w :o :o :w :o :o :o :o :o :w :w :w :w :o :w :w]
+   [:w :o :o :w :o :o :w :o :o :w :o :o :o :o :o :o :w :o :o :o :w :w :w :w :w :w :o :w :o :w :w :o :w :w :w :o :w :o :o :o :o :o :w :w :w :w :o :w :w]
+   [:w :w :o :w :o :o :w :o :o :w :w :w :w :o :o :o :w :o :w :w :w :w :w :w :w :w :o :w :o :o :o :o :w :w :w :o :o :o :o :o :o :o :w :w :w :w :o :o :w]
+   [:w :o :o :w :o :o :o :o :o :w :w :w :w :o :w :w :w :o :w :o :o :o :o :o :o :w :o :w :w :w :o :w :w :w :w :w :w :o :o :o :o :o :o :o :w :w :w :w :w]
+   [:w :o :w :w :o :o :o :o :o :o :o :o :o :o :o :w :w :o :w :o :o :o :o :o :o :o :o :w :w :w :o :w :w :w :w :w :w :o :o :o :o :o :w :o :w :w :w :w :w]
+   [:w :o :w :w :w :w :w :w :w :w :w :w :w :w :o :w :w :o :o :o :w :W :W :o :o :w :w :w :w :w :o :w :w :w :w :w :w :w :o :w :w :w :w :o :o :o :w :w :w]
+   [:w :o :w :w :w :o :o :o :o :o :w :w :o :o :o :w :w :w :w :o :w :W :W :o :o :w :w :w :w :w :o :w :w :w :w :w :w :w :o :w :w :w :w :w :w :o :w :w :w]
+   [:w :o :o :o :o :o :w :w :w :o :w :w :o :w :w :w :w :w :w :o :w :W :W :o :o :w :w :w :w :w :o :o :o :o :w :o :o :o :o :w :w :w :w :w :w :o :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :o :w :w :o :o :w :w :w :w :w :o :o :o :o :o :o :o :o :o :o :w :w :w :o :w :w :o :w :w :w :w :w :w :w :w :w :o :w :w :w]
+   [:w :w :o :w :w :w :w :w :w :o :w :w :w :o :o :o :o :o :w :o :o :o :o :o :o :w :w :w :o :w :w :w :o :w :w :o :w :w :w :w :w :w :w :w :w :o :w :w :w]
+   [:w :w :o :w :w :w :o :o :o :o :w :w :w :w :w :w :w :o :w :w :o :w :w :w :w :w :w :w :o :o :w :w :o :w :w :o :w :w :w :w :w :w :w :w :w :o :o :o :w]
+   [:w :o :o :o :o :o :o :w :w :w :w :w :w :w :w :w :w :o :o :o :o :w :w :w :w :w :w :w :w :o :w :w :o :o :w :o :w :w :w :w :w :o :o :o :w :o :w :o :w]
+   [:w :o :o :o :o :w :w :w :w :w :w :w :o :o :o :w :w :w :o :w :w :w :w :w :o :o :o :o :w :o :w :w :w :w :w :o :w :w :w :w :w :o :w :o :w :o :w :o :w]
+   [:w :o :o :o :o :w :w :w :w :o :w :w :o :w :o :w :w :o :o :w :w :w :w :o :o :o :o :o :w :o :w :w :w :w :w :o :o :o :o :o :o :o :w :o :o :o :w :o :w]
+   [:w :o :o :o :o :o :o :w :w :o :w :w :o :w :o :w :w :w :w :w :w :o :o :o :o :o :o :o :w :o :w :w :w :w :w :o :w :w :w :o :w :w :w :w :w :w :w :o :w]
+   [:w :o :o :o :o :w :o :w :w :o :w :o :o :o :o :o :w :w :w :w :w :o :w :w :o :o :o :o :o :o :o :o :w :w :w :o :w :w :w :o :w :w :w :w :w :w :w :o :w]
+   [:w :w :w :o :w :w :o :o :o :o :o :o :o :o :w :o :w :w :w :o :o :o :o :w :o :o :o :o :w :o :w :o :w :w :w :o :w :w :w :o :w :o :o :o :w :w :w :w :w]
+   [:w :w :w :o :w :w :o :w :o :w :w :o :w :o :w :w :w :w :w :o :w :w :o :w :w :w :w :w :w :o :w :o :o :o :o :o :o :w :w :o :o :o :w :o :w :w :w :w :w]
+   [:w :o :o :o :o :o :o :w :o :w :w :o :w :o :o :o :o :o :o :o :w :w :o :w :w :w :w :w :w :o :w :o :o :w :w :o :o :w :w :w :w :w :w :o :w :w :w :w :w]
+   [:w :o :w :w :w :o :w :w :w :w :w :o :w :o :o :o :w :w :o :w :w :w :o :w :w :w :w :o :o :o :w :o :w :w :w :w :o :w :w :w :w :w :w :o :o :o :w :w :w]
+   [:w :o :w :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :w :o :w :w :w :o :o :w :w :w :o :o :w :w :o :o :w :w :w :w :w :w :w :w :o :w :w :w]
+   [:w :w :w :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :w :o :o :o :o :o :w :w :w :w :o :o :o :o :o :o :w :w :w :w :w :w :w :w :o :w :w :w]
+   [:w :w :w :w :o :o :o :o :o :o :w :w :w :o :o :w :w :w :o :w :w :w :o :w :w :o :w :w :w :w :w :o :o :o :o :o :o :w :w :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :w :w :o :o :w :o :w :o :w :w :w :o :w :w :o :o :o :o :o :w :o :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :o :o :o :o :o :o :o :o :w :w]
+   [:w :w :w :w :o :o :o :o :o :o :o :o :o :o :w :w :o :o :o :o :o :o :o :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :w :w :o :o :w :o :w :o :w :w :o :w :w :w :o :o :o :o :o :w :w :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :o :o :o :o :o :o :o :o :w :w :o :o :o :o :o :o :o :o :w :w :w :w :o :o :w :w :w :w :w :w :w :w :o :o :o :o :o :o :o :o :o :o :o :o :o :w :w]
+   [:w :w :o :w :o :o :w :o :w :o :w :w :w :w :o :w :o :o :o :o :w :w :w :w :w :o :o :o :o :o :o :o :o :o :o :w :w :w :o :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :o :w :o :o :o :o :o :o :w :w :w :w :o :w :w :w :w :w :w :w :w :o :o :o :w :w :w :w :w :o :w :w :w :w :w :w :o :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :o :w :w :w :w :w :w :w :w :w :w :w :o :o :o :o :w :w :w :w :w :o :w :w :w :w :w :w :w :o :o :w :w :w :w :w :o :o :o :o :o :o :o :o :o :w :w]
+   [:w :w :o :o :o :o :o :o :o :o :w :w :w :w :w :w :w :o :w :w :w :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :w :w :o :o :o :o :o :o :w :w]
+   [:w :w :w :w :w :w :w :w :w :o :w :w :w :w :w :o :o :o :o :o :w :w :w :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :w :w :w :w :w :w :w :o :w :w]
+   [:w :w :o :o :o :o :o :o :o :o :w :w :w :w :w :o :w :w :w :o :w :w :w :o :w :w :w :w :w :o :o :o :o :o :w :w :o :w :w :w :w :w :w :w :w :w :o :w :w]
+   [:w :w :o :w :w :w :w :w :w :w :w :w :w :w :w :o :w :o :w :o :o :o :o :o :w :w :w :w :w :o :o :o :o :o :w :w :o :w :w :w :w :w :o :o :o :o :o :o :w]
+   [:w :w :o :o :o :o :o :w :w :w :w :w :w :w :w :o :w :w :w :o :w :w :o :w :w :w :o :o :o :o :o :o :o :o :w :w :o :w :w :w :w :w :o :w :w :w :w :o :w]
+   [:w :w :w :w :w :w :o :w :w :w :w :w :w :w :w :o :o :o :o :o :w :w :o :w :w :w :o :w :w :o :o :o :o :o :o :o :o :o :o :w :w :w :o :w :w :w :w :o :w]
+   [:w :w :w :w :w :w :o :o :o :o :o :o :o :o :o :o :o :o :o :o :w :w :o :w :w :w :o :w :w :o :o :o :o :o :w :w :w :w :o :w :w :w :o :w :w :w :w :o :w]
+   [:w :w :w :w :w :w :w :w :w :o :w :w :w :w :w :o :w :w :w :w :w :w :o :w :w :w :o :w :w :o :o :o :o :o :w :w :w :o :o :w :w :w :o :w :o :o :o :g :w]
+   [:w :w :w :w :w :w :w :w :w :o :w :w :w :w :w :o :w :w :w :o :w :w :o :w :w :w :o :o :w :w :w :w :w :w :w :w :w :o :w :w :w :w :o :w :o :w :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :o :w :w :w :w :w :o :w :o :o :o :o :o :o :w :w :w :w :o :w :w :w :w :w :w :w :w :w :o :o :w :w :w :o :o :o :w :w :w :w]
+   [:w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :o :o :o :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w :w]])
+```
 
-FIXME: explanation
+Solving:
 
-Run the project directly:
+```clojure
+(print-map-and-route* test-mapw)
+```
+Solution:
 
-    $ clojure -M -m exfn.maze-solver
+![maze solution](solution.png)
 
-Run the project's tests (they'll fail until you edit them):
-
-    $ clojure -M:test:runner
-
-Build an uberjar:
-
-    $ clojure -M:uberjar
-
-Run that uberjar:
-
-    $ java -jar maze-solver.jar
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2020 Stuart
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
